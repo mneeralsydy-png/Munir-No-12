@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منير رقم 1 - تسجيل دخول</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>منير رقم 1</h2>
+<input id="email" placeholder="البريد الإلكتروني">
+<input id="password" type="password" placeholder="كلمة المرور">
+<button onclick="login()">تسجيل الدخول</button>
+<button onclick="register()">تسجيل جديد</button>
+
+<script>
+async function login(){
+ const r = await fetch('/api/login',{
+   method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body: JSON.stringify({email:email.value,password:password.value})
+ });
+ const d = await r.json();
+ if(d.ok){
+   localStorage.token = d.token;
+   localStorage.balance = d.balance;
+   location='app.html';
+ } else { alert(d.error); }
+}
+
+async function register(){
+ const r = await fetch('/api/register',{
+   method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body: JSON.stringify({email:email.value,password:password.value})
+ });
+ const d = await r.json();
+ if(d.ok) alert("تم التسجيل بنجاح");
+ else alert(d.error);
+}
+</script>
+
+</body>
+</html>

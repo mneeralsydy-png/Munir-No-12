@@ -1,70 +1,68 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>منير رقم 1</title>
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منير رقم 1 - لوحة الاتصال</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
 <body>
+    <div id="app">
+        <header>
+            <div class="balance-badge">الرصيد: <span id="balance">$0.00</span></div>
+        </header>
 
-<div id="app">
+        <section id="dialer" class="screen active">
+            <div id="numberDisplay"></div>
+            <div class="keypad">
+                <button onclick="press('1')">1</button>
+                <button onclick="press('2')">2</button>
+                <button onclick="press('3')">3</button>
+                <button onclick="press('4')">4</button>
+                <button onclick="press('5')">5</button>
+                <button onclick="press('6')">6</button>
+                <button onclick="press('7')">7</button>
+                <button onclick="press('8')">8</button>
+                <button onclick="press('9')">9</button>
+                <button onclick="press('*')">*</button>
+                <button onclick="press('0')">0</button>
+                <button onclick="press('#')">#</button>
+            </div>
+            <div class="actions">
+                <button class="call-btn" onclick="makeCall()"><i class="fas fa-phone"></i></button>
+                <button class="delete-btn" onclick="del()"><i class="fas fa-backspace"></i></button>
+            </div>
+        </section>
 
-  <!-- شاشة الاتصال -->
-  <section id="dialer" class="screen active">
-    <div class="top">
-      <label><input type="checkbox" id="hideId"/> إخفاء الرقم</label>
+        <section id="logs" class="screen">
+            <h3>سجل المكالمات</h3>
+            <ul id="logsList"></ul>
+        </section>
+
+        <section id="wallet" class="screen">
+            <h3>المحفظة</h3>
+            <div class="wallet-card">
+                <p>الرصيد المتاح</p>
+                <h1 id="wallet-balance">$0.00</h1>
+                <button class="primary-btn">شحن الرصيد</button>
+            </div>
+        </section>
+
+        <section id="settings" class="screen">
+            <h3>الإعدادات</h3>
+            <button onclick="logout()" class="danger-btn">تسجيل الخروج</button>
+        </section>
+
+        <nav class="bottom-nav">
+            <button onclick="nav('dialer')" class="active"><i class="fas fa-th"></i><span>لوحة</span></button>
+            <button onclick="nav('logs')"><i class="fas fa-history"></i><span>السجل</span></button>
+            <button onclick="nav('wallet')"><i class="fas fa-wallet"></i><span>المحفظة</span></button>
+            <button onclick="nav('settings')"><i class="fas fa-cog"></i><span>إعدادات</span></button>
+        </nav>
     </div>
 
-    <div id="numberDisplay"></div>
-
-    <div class="keypad">
-      <button onclick="press('1')">1</button>
-      <button onclick="press('2')">2</button>
-      <button onclick="press('3')">3</button>
-      <button onclick="press('4')">4</button>
-      <button onclick="press('5')">5</button>
-      <button onclick="press('6')">6</button>
-      <button onclick="press('7')">7</button>
-      <button onclick="press('8')">8</button>
-      <button onclick="press('9')">9</button>
-      <button onclick="press('*')">*</button>
-      <button onclick="press('0')">0</button>
-      <button onclick="press('#')">#</button>
-    </div>
-
-    <button class="call" onclick="call()">📞 اتصال</button>
-  </section>
-
-  <!-- سجل المكالمات -->
-  <section id="logs" class="screen">
-    <h3>سجل المكالمات</h3>
-    <ul id="logsList"></ul>
-  </section>
-
-  <!-- المحفظة -->
-  <section id="wallet" class="screen">
-    <h3>المحفظة</h3>
-    <div class="balance">الرصيد: <span id="balance">$1.00</span></div>
-    <button onclick="alert('ميزة الشحن ستضاف لاحقًا')">شحن الرصيد</button>
-  </section>
-
-  <!-- الإعدادات -->
-  <section id="settings" class="screen">
-    <h3>الإعدادات</h3>
-    <button onclick="logout()">تسجيل خروج</button>
-  </section>
-
-</div>
-
-<nav>
-  <button onclick="nav('dialer')"><i class="fa fa-phone"></i></button>
-  <button onclick="nav('logs')"><i class="fa fa-clock"></i></button>
-  <button onclick="nav('wallet')"><i class="fa fa-wallet"></i></button>
-  <button onclick="nav('settings')"><i class="fa fa-gear"></i></button>
-</nav>
-
-<script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

@@ -1,45 +1,48 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>منير رقم 1 - تسجيل دخول</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منير رقم 1 - تسجيل الدخول</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="auth-container">
+        <h2>منير رقم 1</h2>
+        <div id="login-form">
+            <input type="email" id="email" placeholder="البريد الإلكتروني">
+            <input type="password" id="password" placeholder="كلمة المرور">
+            <button onclick="handleAuth('login')" class="primary-btn">تسجيل الدخول</button>
+            <button onclick="handleAuth('register')" class="secondary-btn">إنشاء حساب جديد</button>
+        </div>
+    </div>
 
-<h2>منير رقم 1</h2>
-<input id="email" placeholder="البريد الإلكتروني">
-<input id="password" type="password" placeholder="كلمة المرور">
-<button onclick="login()">تسجيل الدخول</button>
-<button onclick="register()">تسجيل جديد</button>
+    <script>
+        async function handleAuth(type) {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if(!email || !password) return alert("يرجى ملء كافة الحقول");
 
-<script>
-async function login(){
- const r = await fetch('/api/login',{
-   method:'POST',
-   headers:{'Content-Type':'application/json'},
-   body: JSON.stringify({email:email.value,password:password.value})
- });
- const d = await r.json();
- if(d.ok){
-   localStorage.token = d.token;
-   localStorage.balance = d.balance;
-   location='app.html';
- } else { alert(d.error); }
-}
-
-async function register(){
- const r = await fetch('/api/register',{
-   method:'POST',
-   headers:{'Content-Type':'application/json'},
-   body: JSON.stringify({email:email.value,password:password.value})
- });
- const d = await r.json();
- if(d.ok) alert("تم التسجيل بنجاح");
- else alert(d.error);
-}
-</script>
-
+            const res = await fetch(`/api/${type}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if(data.ok) {
+                if(type === 'login') {
+                    localStorage.token = data.token;
+                    localStorage.balance = data.balance;
+                    location.href = 'app.html';
+                } else {
+                    alert("تم التسجيل بنجاح، يمكنك الآن تسجيل الدخول");
+                }
+            } else {
+                alert(data.error);
+            }
+        }
+        if(localStorage.token) location.href = 'app.html';
+    </script>
 </body>
 </html>

@@ -1,120 +1,34 @@
-body {
-  margin:0;
-  font-family: sans-serif;
-  background:#f1f5f9;
-}
+* { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+body { margin: 0; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
 
-#app {
-  padding-bottom:60px;
-}
+#app { width: 100%; max-width: 400px; height: 100vh; background: white; position: relative; display: flex; flex-direction: column; }
 
-.screen {
-  display:none;
-  padding:20px;
-}
+header { padding: 15px; background: #1565c0; color: white; display: flex; justify-content: flex-end; }
+.balance-badge { background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; font-weight: bold; }
 
-.screen.active {
-  display:block;
-}
+.screen { flex: 1; display: none; padding: 20px; overflow-y: auto; }
+.screen.active { display: block; }
 
-.top {
-  text-align:center;
-  margin-bottom:10px;
-}
+#numberDisplay { height: 60px; font-size: 2rem; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; background: #f8f9fa; border-radius: 10px; }
 
-#logsList {
-  list-style: none;
-  padding: 0;
-}
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+.keypad button { height: 70px; font-size: 1.5rem; border: 1px solid #eee; background: white; border-radius: 50%; cursor: pointer; transition: 0.2s; }
+.keypad button:active { background: #e3f2fd; }
 
-#logsList li {
-  background: white;
-  margin-bottom: 8px;
-  padding: 12px;
-  border-radius: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
+.actions { display: flex; justify-content: center; gap: 30px; margin-top: 30px; }
+.call-btn { width: 70px; height: 70px; border-radius: 50%; background: #4caf50; color: white; font-size: 1.5rem; border: none; cursor: pointer; }
+.delete-btn { background: none; border: none; color: #757575; font-size: 1.5rem; cursor: pointer; }
 
-#logsList li small {
-  color: #64748b;
-}
+.bottom-nav { height: 70px; border-top: 1px solid #eee; display: flex; justify-content: space-around; background: white; }
+.bottom-nav button { background: none; border: none; color: #9e9e9e; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; }
+.bottom-nav button.active { color: #1565c0; }
+.bottom-nav button i { font-size: 1.2rem; margin-bottom: 5px; }
 
-.balance {
-  font-size: 24px;
-  font-weight: bold;
-  color: #1e293b;
-  margin: 20px 0;
-}
+.auth-container { width: 100%; max-width: 300px; text-align: center; }
+.auth-container input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; }
+.primary-btn { width: 100%; padding: 12px; background: #1565c0; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+.secondary-btn { width: 100%; padding: 12px; background: none; border: 1px solid #1565c0; color: #1565c0; border-radius: 8px; cursor: pointer; }
+.danger-btn { width: 100%; padding: 12px; background: #f44336; color: white; border: none; border-radius: 8px; cursor: pointer; }
 
-#wallet button, #settings button {
-  width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  border: none;
-  background: #3b82f6;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-#settings button {
-  background: #ef4444;
-}
-
-input {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 10px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  box-sizing: border-box;
-}
-
-h2 { text-align: center; color: #1e293b; }
-button { cursor: pointer; }
-
-.keypad {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-}
-
-.keypad button {
-  padding:20px;
-  font-size:20px;
-  border-radius:10px;
-  border:none;
-  background:#e2e8f0;
-}
-
-.call {
-  width:100%;
-  margin-top:20px;
-  padding:15px;
-  font-size:18px;
-  background:#10b981;
-  color:white;
-  border:none;
-  border-radius:50px;
-}
-
-nav {
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  height:60px;
-  background:white;
-  display:flex;
-  justify-content:space-around;
-  border-top:1px solid #ddd;
-}
-
-nav button {
-  background:none;
-  border:none;
-  font-size:20px;
-}
+.wallet-card { background: #e3f2fd; padding: 30px; border-radius: 15px; text-align: center; color: #1565c0; }
+.wallet-card h1 { margin: 10px 0; font-size: 2.5rem; }

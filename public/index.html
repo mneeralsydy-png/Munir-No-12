@@ -2,27 +2,158 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منير رقم 1 - تسجيل الدخول</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>تطبيق الاتصال الاحترافي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1565C0;
+            --primary-dark: #0D47A1;
+            --accent-green: #4CAF50;
+            --accent-red: #F44336;
+            --bg-color: #F5F5F5;
+            --white: #FFFFFF;
+            --text-dark: #333333;
+            --text-gray: #757575;
+            --border-radius: 12px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #e0e0e0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+
+        #app-container {
+            width: 100%; max-width: 400px; height: 100vh; max-height: 850px;
+            background-color: var(--bg-color); position: relative; overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2); display: flex; flex-direction: column;
+        }
+
+        .hidden { display: none !important; }
+        .btn { border: none; outline: none; cursor: pointer; font-family: inherit; transition: transform 0.1s; user-select: none; }
+        .btn:active { transform: scale(0.95); }
+        .page { flex: 1; overflow-y: auto; padding-bottom: 70px; display: none; background: var(--bg-color); }
+        .page.active { display: block; }
+
+        /* Login Screen */
+        #login-screen {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            z-index: 8000; color: var(--white); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; padding: 2rem; text-align: center;
+        }
+        .login-logo { font-size: 3rem; margin-bottom: 1rem; background: var(--white); color: var(--primary-color); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .form-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; font-size: 1rem; }
+        .btn-primary { background: var(--white); color: var(--primary-color); width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 1.1rem; }
+        .btn-secondary { background: transparent; color: var(--white); border: 1px solid rgba(255,255,255,0.3); width: 100%; padding: 10px; border-radius: 8px; margin-top: 10px; }
+
+        /* Dialer Page */
+        .keypad-header { padding: 20px; text-align: center; position: relative; background: white; }
+        .balance-btn { position: absolute; top: 20px; left: 20px; background: #e3f2fd; color: var(--primary-color); border: none; padding: 5px 12px; border-radius: 20px; font-weight: bold; }
+        .dial-display { font-size: 2.5rem; margin: 10px 0; height: 60px; letter-spacing: 2px; color: var(--text-dark); }
+        .keypad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 10px 40px; }
+        .key-btn { background: white; border: 1px solid #eee; border-radius: 50%; width: 70px; height: 70px; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
+        .call-row { display: flex; justify-content: center; align-items: center; gap: 30px; padding: 20px 0; }
+        .call-btn { background-color: var(--accent-green); color: white; width: 70px; height: 70px; border-radius: 50%; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; }
+        .delete-btn { color: var(--text-gray); font-size: 1.5rem; background: transparent; }
+
+        /* Bottom Nav */
+        .bottom-nav { position: absolute; bottom: 0; width: 100%; height: 60px; background: var(--white); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #ddd; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #999; font-size: 0.75rem; cursor: pointer; }
+        .nav-item.active { color: var(--primary-color); }
+        .nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
+
+        /* List Styling */
+        .top-bar { background: var(--primary-color); color: white; padding: 15px; text-align: center; }
+        .list-item { background: white; padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .wallet-card { background: white; margin: 20px; padding: 30px; border-radius: 15px; text-align: center; box-shadow: var(--shadow); }
+        .wallet-card h1 { font-size: 2.5rem; color: var(--primary-color); margin: 10px 0; }
+    </style>
 </head>
 <body>
-    <div class="auth-container">
-        <h2>منير رقم 1</h2>
-        <div id="login-form">
-            <input type="email" id="email" placeholder="البريد الإلكتروني">
-            <input type="password" id="password" placeholder="كلمة المرور">
-            <button onclick="handleAuth('login')" class="primary-btn">تسجيل الدخول</button>
-            <button onclick="handleAuth('register')" class="secondary-btn">إنشاء حساب جديد</button>
+    <div id="app-container">
+        <!-- Login Screen -->
+        <div id="login-screen">
+            <div class="login-logo"><i class="fas fa-phone-alt"></i></div>
+            <h2>Private Dialer</h2>
+            <div style="width: 100%; max-width: 300px; margin-top: 20px;">
+                <input type="email" id="login-email" class="form-input" placeholder="البريد الإلكتروني">
+                <input type="password" id="login-pass" class="form-input" placeholder="كلمة المرور">
+                <button class="btn btn-primary" onclick="handleAuth('login')">تسجيل الدخول</button>
+                <button class="btn btn-secondary" onclick="handleAuth('register')">إنشاء حساب جديد</button>
+            </div>
+        </div>
+
+        <!-- Main App Content -->
+        <div id="main-app" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
+            <!-- Dialer Page -->
+            <section id="screen-keypad" class="page active">
+                <div class="keypad-header">
+                    <button class="btn balance-btn" id="balance-display">$0.00</button>
+                    <div class="dial-display" id="dial-display"></div>
+                </div>
+                <div class="keypad-grid">
+                    <button class="btn key-btn" onclick="dial('1')">1</button>
+                    <button class="btn key-btn" onclick="dial('2')">2</button>
+                    <button class="btn key-btn" onclick="dial('3')">3</button>
+                    <button class="btn key-btn" onclick="dial('4')">4</button>
+                    <button class="btn key-btn" onclick="dial('5')">5</button>
+                    <button class="btn key-btn" onclick="dial('6')">6</button>
+                    <button class="btn key-btn" onclick="dial('7')">7</button>
+                    <button class="btn key-btn" onclick="dial('8')">8</button>
+                    <button class="btn key-btn" onclick="dial('9')">9</button>
+                    <button class="btn key-btn" onclick="dial('*')">*</button>
+                    <button class="btn key-btn" onclick="dial('0')">0</button>
+                    <button class="btn key-btn" onclick="dial('#')">#</button>
+                </div>
+                <div class="call-row">
+                    <button class="btn call-btn" onclick="makeCall()"><i class="fas fa-phone"></i></button>
+                    <button class="btn delete-btn" onclick="deleteDigit()"><i class="fas fa-backspace"></i></button>
+                </div>
+            </section>
+
+            <!-- Recents Page -->
+            <section id="screen-recents" class="page">
+                <div class="top-bar"><h2>السجل</h2></div>
+                <div id="recents-list"></div>
+            </section>
+
+            <!-- Wallet Page -->
+            <section id="screen-wallet" class="page">
+                <div class="top-bar"><h2>المحفظة</h2></div>
+                <div class="wallet-card">
+                    <p>الرصيد الحالي</p>
+                    <h1 id="wallet-balance">$0.00</h1>
+                    <button class="btn btn-primary" style="background: var(--primary-color); color: white;">شحن الرصيد</button>
+                </div>
+            </section>
+
+            <!-- Settings Page -->
+            <section id="screen-settings" class="page">
+                <div class="top-bar"><h2>الإعدادات</h2></div>
+                <div style="padding: 20px;">
+                    <button class="btn btn-primary" style="background: var(--accent-red); color: white;" onclick="handleLogout()">تسجيل الخروج</button>
+                </div>
+            </section>
+
+            <!-- Bottom Nav -->
+            <nav class="bottom-nav">
+                <div class="nav-item active" onclick="switchTab('screen-keypad', this)"><i class="fas fa-th"></i><span>لوحة</span></div>
+                <div class="nav-item" onclick="switchTab('screen-recents', this)"><i class="fas fa-history"></i><span>السجل</span></div>
+                <div class="nav-item" onclick="switchTab('screen-wallet', this)"><i class="fas fa-wallet"></i><span>المحفظة</span></div>
+                <div class="nav-item" onclick="switchTab('screen-settings', this)"><i class="fas fa-cog"></i><span>إعدادات</span></div>
+            </nav>
         </div>
     </div>
 
     <script>
+        let currentNumber = "";
+        const token = localStorage.token;
+
         async function handleAuth(type) {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            if(!email || !password) return alert("يرجى ملء كافة الحقول");
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-pass').value;
+            if(!email || !password) return alert("يرجى ملء الحقول");
 
             const res = await fetch(`/api/${type}`, {
                 method: 'POST',
@@ -33,16 +164,67 @@
             if(data.ok) {
                 if(type === 'login') {
                     localStorage.token = data.token;
-                    localStorage.balance = data.balance;
-                    location.href = 'app.html';
+                    location.reload();
                 } else {
-                    alert("تم التسجيل بنجاح، يمكنك الآن تسجيل الدخول");
+                    alert("تم التسجيل بنجاح");
                 }
             } else {
                 alert(data.error);
             }
         }
-        if(localStorage.token) location.href = 'app.html';
+
+        function dial(k) { currentNumber += k; updateDisplay(); }
+        function deleteDigit() { currentNumber = currentNumber.slice(0, -1); updateDisplay(); }
+        function updateDisplay() { document.getElementById('dial-display').textContent = currentNumber; }
+
+        function switchTab(id, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        async function updateUserData() {
+            if(!localStorage.token) return;
+            const res = await fetch('/api/user', {
+                headers: { 'Authorization': `Bearer ${localStorage.token}` }
+            });
+            const data = await res.json();
+            if(data.ok) {
+                const bal = `$${data.user.balance.toFixed(2)}`;
+                document.getElementById('balance-display').innerText = bal;
+                document.getElementById('wallet-balance').innerText = bal;
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+            } else {
+                localStorage.clear();
+            }
+        }
+
+        async function makeCall() {
+            if(!currentNumber) return alert("أدخل الرقم");
+            const res = await fetch('/api/call', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.token}`
+                },
+                body: JSON.stringify({ to: currentNumber })
+            });
+            const data = await res.json();
+            if(data.ok) {
+                alert("جاري الاتصال...");
+                currentNumber = "";
+                updateDisplay();
+                updateUserData();
+            } else {
+                alert(data.error);
+            }
+        }
+
+        function handleLogout() { localStorage.clear(); location.reload(); }
+
+        if(localStorage.token) updateUserData();
     </script>
 </body>
 </html>

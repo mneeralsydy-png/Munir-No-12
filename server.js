@@ -90,6 +90,13 @@ app.get("/api/user", authenticate, (req, res) => {
   });
 });
 
+app.get("/api/history", authenticate, (req, res) => {
+  db.all("SELECT toNumber, cost, timestamp FROM calls WHERE userId = ? ORDER BY timestamp DESC", [req.userId], (err, rows) => {
+    if (err) return res.json({ ok: false, error: err.message });
+    res.json({ ok: true, history: rows });
+  });
+});
+
 app.post("/api/call", authenticate, (req, res) => {
   const { to } = req.body;
   db.get("SELECT balance FROM users WHERE id = ?", [req.userId], (err, user) => {

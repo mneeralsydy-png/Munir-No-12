@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>تطبيق الاتصال الاحترافي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <script src="https://sdk.twilio.com/js/voice/v2.1.1/twilio.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1565C0;
+            --primary-dark: #0D47A1;
+            --accent-green: #4CAF50;
+            --accent-red: #F44336;
+            --bg-color: #F5F5F5;
+            --white: #FFFFFF;
+            --text-dark: #333333;
+            --text-gray: #757575;
+            --border-radius: 12px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #e0e0e0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+
+        #app-container {
+            width: 100%; max-width: 400px; height: 100vh; max-height: 850px;
+            background-color: var(--bg-color); position: relative; overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2); display: flex; flex-direction: column;
+        }
+
+        .hidden { display: none !important; }
+        .btn { border: none; outline: none; cursor: pointer; font-family: inherit; transition: transform 0.1s; user-select: none; }
+        .btn:active { transform: scale(0.95); }
+        .page { flex: 1; overflow-y: auto; padding-bottom: 70px; display: none; background: var(--bg-color); }
+        .page.active { display: block; }
+
+        /* Login Screen */
+        #login-screen {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            z-index: 8000; color: var(--white); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; padding: 2rem; text-align: center;
+        }
+        .login-logo { font-size: 3rem; margin-bottom: 1rem; background: var(--white); color: var(--primary-color); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .form-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; font-size: 1rem; text-align: center; }
+        .btn-primary { background: var(--white); color: var(--primary-color); width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 1.1rem; box-shadow: var(--shadow); }
+
+        /* Dialer Page */
+        .keypad-header { padding: 20px; text-align: center; position: relative; background: white; border-bottom: 1px solid #eee; }
+        .balance-btn { position: absolute; top: 20px; left: 20px; background: #e3f2fd; color: var(--primary-color); border: none; padding: 5px 12px; border-radius: 20px; font-weight: bold; }
+        .dial-display { font-size: 2.5rem; margin: 10px 0; height: 60px; letter-spacing: 2px; color: var(--text-dark); display: flex; align-items: center; justify-content: center; }
+        .keypad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 20px 40px; flex: 1; }
+        .key-btn { background: white; border: 1px solid #eee; border-radius: 50%; width: 70px; height: 70px; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .key-btn:active { background: #f0f4f8; }
+        .call-row { display: flex; justify-content: center; align-items: center; gap: 30px; padding: 20px 0; }
+        .call-btn { background-color: var(--accent-green); color: white; width: 70px; height: 70px; border-radius: 50%; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(76,175,80,0.3); }
+        .delete-btn { color: var(--text-gray); font-size: 1.5rem; background: transparent; }
+
+        /* Bottom Nav */
+        .bottom-nav { position: absolute; bottom: 0; width: 100%; height: 60px; background: var(--white); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #999; font-size: 0.75rem; cursor: pointer; flex: 1; height: 100%; justify-content: center; }
+        .nav-item.active { color: var(--primary-color); }
+        .nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
+
+        /* List Styling */
+        .top-bar { background: var(--primary-color); color: white; padding: 15px; text-align: center; font-weight: bold; }
+        .list-item { background: white; padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .list-item .num { font-weight: bold; color: var(--text-dark); }
+        .list-item .meta { font-size: 0.8rem; color: var(--text-gray); }
+        .wallet-card { background: white; margin: 20px; padding: 30px; border-radius: 15px; text-align: center; box-shadow: var(--shadow); }
+        .wallet-card h1 { font-size: 2.5rem; color: var(--primary-color); margin: 10px 0; }
+        
+        /* Active Call Overlay */
+        #active-call-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 9000; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; display: none; }
+        .end-call-btn { background: var(--accent-red); color: white; width: 70px; height: 70px; border-radius: 50%; font-size: 1.8rem; margin-top: 50px; }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <!-- Login Screen -->
+        <div id="login-screen">
+            <div class="login-logo"><i class="fas fa-phone-alt"></i></div>
+            <h2 style="margin-bottom: 5px;">منير رقم 1</h2>
+            <p style="opacity: 0.8; margin-bottom: 20px;">تطبيق الاتصال الخاص</p>
+            <div style="width: 100%; max-width: 300px;">
+                <input type="email" id="login-email" class="form-input" placeholder="البريد الإلكتروني">
+                <input type="password" id="login-pass" class="form-input" placeholder="كلمة المرور">
+                <button class="btn btn-primary" onclick="handleAuth('login')">دخول</button>
+            </div>
+        </div>
+
+        <!-- Main App Content -->
+        <div id="main-app" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
+            <!-- Dialer Page -->
+            <section id="screen-keypad" class="page active">
+                <div class="keypad-header">
+                    <button class="btn balance-btn" id="balance-display" onclick="switchTab('screen-wallet', document.querySelector('[data-tab=wallet]'))">$0.00</button>
+                    <div class="dial-display" id="dial-display"></div>
+                </div>
+                <div class="keypad-grid">
+                    <button class="btn key-btn" onclick="dial('1')">1</button>
+                    <button class="btn key-btn" onclick="dial('2')">2</button>
+                    <button class="btn key-btn" onclick="dial('3')">3</button>
+                    <button class="btn key-btn" onclick="dial('4')">4</button>
+                    <button class="btn key-btn" onclick="dial('5')">5</button>
+                    <button class="btn key-btn" onclick="dial('6')">6</button>
+                    <button class="btn key-btn" onclick="dial('7')">7</button>
+                    <button class="btn key-btn" onclick="dial('8')">8</button>
+                    <button class="btn key-btn" onclick="dial('9')">9</button>
+                    <button class="btn key-btn" onclick="dial('*')">*</button>
+                    <button class="btn key-btn" onclick="dial('0')">0</button>
+                    <button class="btn key-btn" onclick="dial('#')">#</button>
+                </div>
+                <div class="call-row">
+                    <button class="btn call-btn" onclick="makeCall()"><i class="fas fa-phone"></i></button>
+                    <button class="btn delete-btn" onclick="deleteDigit()"><i class="fas fa-backspace"></i></button>
+                </div>
+            </section>
+
+            <!-- Recents Page -->
+            <section id="screen-recents" class="page">
+                <div class="top-bar"><h2>سجل المكالمات</h2></div>
+                <div id="recents-list"></div>
+            </section>
+
+            <!-- Wallet Page -->
+            <section id="screen-wallet" class="page">
+                <div class="top-bar"><h2>المحفظة</h2></div>
+                <div class="wallet-card">
+                    <p>الرصيد المتاح</p>
+                    <h1 id="wallet-balance">$0.00</h1>
+                    <button class="btn btn-primary" style="background: var(--primary-color); color: white;" onclick="alert('خدمة الشحن ستتوفر قريباً')">شحن الرصيد</button>
+                </div>
+            </section>
+
+            <!-- Settings Page -->
+            <section id="screen-settings" class="page">
+                <div class="top-bar"><h2>حسابي</h2></div>
+                <div style="padding: 20px;">
+                    <div class="list-item" style="border-radius: 12px; margin-bottom: 10px; box-shadow: var(--shadow);">
+                        <span>UID</span>
+                        <span id="user-uid-display" style="color: var(--text-gray);"></span>
+                    </div>
+                    <div class="list-item" style="border-radius: 12px; margin-bottom: 10px; box-shadow: var(--shadow);">
+                        <span>الرقم الأمريكي</span>
+                        <span id="user-number-display" style="color: var(--text-gray);">+1822...</span>
+                    </div>
+                    <div class="list-item" style="border-radius: 12px; margin-bottom: 20px; box-shadow: var(--shadow);">
+                        <span>إصدار التطبيق</span>
+                        <span style="color: var(--text-gray);">V 1.0.0</span>
+                    </div>
+                    <button class="btn btn-primary" style="background: var(--accent-red); color: white;" onclick="handleLogout()">تسجيل الخروج</button>
+                </div>
+            </section>
+
+            <!-- Bottom Nav -->
+            <nav class="bottom-nav">
+                <div class="nav-item active" onclick="switchTab('screen-keypad', this)"><i class="fas fa-th"></i><span>لوحة</span></div>
+                <div class="nav-item" onclick="switchTab('screen-recents', this); loadHistory();"><i class="fas fa-history"></i><span>السجل</span></div>
+                <div class="nav-item" data-tab="wallet" onclick="switchTab('screen-wallet', this)"><i class="fas fa-wallet"></i><span>المحفظة</span></div>
+                <div class="nav-item" onclick="switchTab('screen-settings', this)"><i class="fas fa-user"></i><span>حسابي</span></div>
+            </nav>
+        </div>
+        
+        <!-- Call Overlay -->
+        <div id="active-call-overlay">
+            <h2 id="calling-number">...</h2>
+            <div id="call-timer" style="font-size: 2rem; margin-top: 20px;">00:00</div>
+            <button class="btn end-call-btn" onclick="hangup()"><i class="fas fa-phone-slash"></i></button>
+        </div>
+    </div>
+
+    <script>
+        // Real Firebase Config
+        const firebaseConfig = { 
+            apiKey: "GOOGLE_API_KEY", 
+            authDomain: "call-now-24582.firebaseapp.com", 
+            projectId: "call-now-24582", 
+            databaseURL: "https://call-now-24582-default-rtdb.firebaseio.com/" 
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        let currentNumber = "";
+        let device = null;
+        let callTimerInterval = null;
+        let callSeconds = 0;
+
+        async function requestPermissions() {
+            try {
+                // Request Microphone
+                await navigator.mediaDevices.getUserMedia({ audio: true });
+                // Request Notifications
+                if ('Notification' in window) await Notification.requestPermission();
+                // Request Contacts (Contact Picker API)
+                if ('contacts' in navigator && 'select' in navigator.contacts) {
+                    console.log("Contacts API supported");
+                }
+            } catch (e) { console.error("Permission denied", e); }
+        }
+
+        async function handleAuth(type) {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-pass').value;
+            if(!email || !password) return alert("يرجى ملء الحقول");
+
+            try {
+                const res = await fetch(`/api/${type}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if(data.ok) {
+                    if(type === 'login') {
+                        localStorage.token = data.token;
+                        localStorage.uid = data.uid;
+                        await requestPermissions();
+                        location.reload();
+                    }
+                } else {
+                    alert(data.error);
+                }
+            } catch(e) { alert("حدث خطأ في الاتصال"); }
+        }
+
+        function dial(k) { currentNumber += k; updateDisplay(); }
+        function deleteDigit() { currentNumber = currentNumber.slice(0, -1); updateDisplay(); }
+        function updateDisplay() { document.getElementById('dial-display').textContent = currentNumber; }
+
+        function switchTab(id, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        async function updateUserData() {
+            if(!localStorage.token) return;
+            try {
+                const res = await fetch('/api/user', {
+                    headers: { 'Authorization': `Bearer ${localStorage.token}` }
+                });
+                const data = await res.json();
+                if(data.ok) {
+                    const bal = `$${data.user.balance.toFixed(2)}`;
+                    document.getElementById('balance-display').innerText = bal;
+                    document.getElementById('wallet-balance').innerText = bal;
+                    document.getElementById('user-uid-display').innerText = data.user.id;
+                    // Mock US number for UI as requested
+                    document.getElementById('user-number-display').innerText = "+1822" + (1000000 + data.user.id);
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('main-app').classList.remove('hidden');
+                } else {
+                    localStorage.clear();
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadHistory() {
+            try {
+                const res = await fetch('/api/history', {
+                    headers: { 'Authorization': `Bearer ${localStorage.token}` }
+                });
+                const data = await res.json();
+                if(data.ok) {
+                    const list = document.getElementById('recents-list');
+                    list.innerHTML = data.history.map(h => `
+                        <div class="list-item">
+                            <div class="list-info">
+                                <div class="num">${h.toNumber}</div>
+                                <div class="meta">${new Date(h.timestamp).toLocaleString('ar-YE')}</div>
+                            </div>
+                            <div style="color: var(--accent-red); font-weight: bold;">-$${h.cost.toFixed(2)}</div>
+                        </div>
+                    `).join('') || '<p style="text-align:center; padding:20px; color:#999;">لا يوجد سجل مكالمات</p>';
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function makeCall() {
+            if(!currentNumber) return alert("أدخل الرقم");
+            try {
+                const res = await fetch('/api/call', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.token}`
+                    },
+                    body: JSON.stringify({ to: currentNumber })
+                });
+                const data = await res.json();
+                if(data.ok) {
+                    document.getElementById('calling-number').innerText = currentNumber;
+                    document.getElementById('active-call-overlay').style.display = 'flex';
+                    // Start timer simulation - In real app this triggers on WebRTC 'connected'
+                    setTimeout(() => startTimer(), 2000); 
+                } else {
+                    alert(data.error);
+                }
+            } catch(e) { alert("فشل الاتصال بالخادم"); }
+        }
+        
+        function startTimer() {
+            callSeconds = 0;
+            clearInterval(callTimerInterval);
+            callTimerInterval = setInterval(() => {
+                callSeconds++;
+                const m = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+                const s = String(callSeconds % 60).padStart(2, '0');
+                document.getElementById('call-timer').innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        function hangup() {
+            clearInterval(callTimerInterval);
+            document.getElementById('active-call-overlay').style.display = 'none';
+            document.getElementById('call-timer').innerText = "00:00";
+            currentNumber = "";
+            updateDisplay();
+            updateUserData();
+        }
+
+        function handleLogout() { localStorage.clear(); location.reload(); }
+
+        if(localStorage.token) updateUserData();
+    </script>
+</body>
+</html>

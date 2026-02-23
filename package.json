@@ -1,16 +1,18 @@
 {
   "name": "private-dialer",
   "version": "1.0.0",
+  "description": "Private Dialer Application",
   "main": "server.js",
+  "type": "commonjs",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
+    "twilio": "^4.23.0",
     "cors": "^2.8.5",
-    "sqlite3": "^5.1.6",
-    "bcrypt": "^5.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "twilio": "^4.23.0"
+    "firebase-admin": "^11.11.0",
+    "dotenv": "^16.3.1"
   }
 }

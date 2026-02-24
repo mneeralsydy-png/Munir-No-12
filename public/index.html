@@ -5,22 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <title>أبو الزهراء - الاتصال الآمن</title>
 
-    <!-- المكتبات والتصاميم -->
+    <!-- المكتبات والتصاميم (لم يتم تغييرها) -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- SDKs -->
+    <!-- SDKs (Capacitor Plugins & Firebase & Twilio) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://media.twiliocdn.com/sdk/js/client/v1.18/twilio.min.js"></script>
+
+    <!-- Capacitor Core Plugins (Native Features) -->
     <script src="https://unpkg.com/@capacitor/core@5/dist/capacitor.js"></script>
     <script src="https://unpkg.com/@capacitor/permissions@5/dist/permissions.js"></script>
     <script src="https://unpkg.com/@capacitor/local-notifications@5/dist/local-notifications.js"></script>
+    <script src="https://unpkg.com/@capacitor/app@5/dist/app.js"></script>
+
+    <!-- Capacitor Google Auth (For Native Login) -->
+    <script src="https://unpkg.com/@capacitor/google-auth@1.1.0/dist/plugin.js"></script>
+
     <script src="https://www.paypal.com/sdk/js?client-id=AX77yPd3nZvqVsQtTKLAUXVLk9ieO71wvjDk2m3alQcG7ft_J6EOGlacBjrcOvAVghFiYWwPee2S3sfg&currency=USD" async></script>
 
     <style>
-        /* --- تصميم أبو الزهراء الأزرق --- */
+        /* --- تصميم أبو الزهراء الأزرق (لم يتم تغييره) --- */
         :root { --primary-azure: #0078D7; --primary-dark: #005A9E; --white: #ffffff; --bg: #f0f2f5; --text: #333; --green: #107C10; --red: #A80000; --gray: #999; --yellow: #FFC107; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; outline: none; }
         body { background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
@@ -81,7 +88,7 @@
         .btn-del { color: #d32f2f; }
         .btn-add { color: var(--primary-azure); }
 
-        /* Tabs (New for Logs & Messages) */
+        /* Tabs */
         .tabs { display: flex; background: white; padding: 0 10px; border-bottom: 1px solid #ddd; }
         .tab { flex: 1; text-align: center; padding: 14px; color: #666; font-size: 0.9rem; cursor: pointer; border-bottom: 2px solid transparent; font-weight: 600; }
         .tab.active { color: var(--primary-azure); border-bottom-color: var(--primary-azure); }
@@ -113,7 +120,7 @@
         .info-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 15px; }
         .btn-block { width: 100%; padding: 14px; background: var(--primary-azure); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1rem; }
 
-        /* Chat Bubbles */
+        /* Chat */
         .chat-area { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 10px; }
         .message-bubble { max-width: 75%; padding: 10px 15px; border-radius: 15px; margin-bottom: 10px; font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; }
         .msg-received { background: #e0e0e0; color: #333; align-self: flex-start; border-bottom-right-radius: 2px; }
@@ -137,7 +144,7 @@
         #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: white; padding: 12px 24px; border-radius: 30px; font-size: 0.95rem; opacity: 0; transition: 0.3s; z-index: 600; pointer-events: none; text-align: center; }
         #toast.show { opacity: 1; }
 
-        /* Account Page Specifics */
+        /* Account */
         .account-header { text-align: center; margin-bottom: 20px; }
         .account-avatar { width: 80px; height: 80px; background: var(--primary-azure); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; }
         .account-field { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; border: 1px solid #eee; }
@@ -152,13 +159,13 @@
 
 <div id="app">
     <!-- 1. Splash Screen -->
-    <div id="splash-screen">
+<div id="splash-screen">
         <i class="fas fa-phone-volume splash-logo"></i>
         <div class="auth-title">أبو الزهراء</div>
     </div>
 
     <!-- 2. Auth Containers -->
-    <div id="auth-start" class="auth-container" style="display:none;">
+<div id="auth-start" class="auth-container" style="display:block;">
         <i class="fas fa-phone-volume auth-logo"></i>
         <div class="auth-title">أبو الزهراء</div>
         <div class="auth-btn-group">
@@ -170,9 +177,10 @@
         <div class="auth-logo" style="font-size:3rem; margin-bottom:20px;"><i class="fas fa-user-circle"></i></div>
         <div class="auth-btn-group">
             <button class="btn-auth-lg btn-white" onclick="showAuth('login')">تسجيل الدخول</button>
-            <button class="btn-auth-lg btn-google" onclick="handleGoogleSignIn()">
-                <i class="fab fa-google"></i> تسجيل الدخول عبر جوجل
-            </button>
+            <!-- زر Google يفعل دالة handleGoogleLogin في الكود الجديد -->
+<button class="btn-auth-lg btn-google" onclick="handleGoogleLogin('982107544824-1ol6hfhnntfe3jh0huoudpitmhojrmke.apps.googleusercontent.com', '982107544824-jbl3da73lr9h7il169onbl4ftrkmhvaj.apps.googleusercontent.com')">
+    <i class="fab fa-google"></i> تسجيل الدخول عبر جوجل
+</button>
         </div>
     </div>
 
@@ -237,7 +245,7 @@
             </div>
         </div>
 
-        <!-- Contacts Page (Native Picker Integration) -->
+        <!-- Contacts Page -->
         <div id="page-contacts" class="page">
             <div style="padding: 20px; text-align: center; color: #666; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;" id="contacts-empty-state">
                 <i class="fas fa-address-book" style="font-size: 3rem; color: var(--primary-azure); margin-bottom: 15px; opacity: 0.5;"></i>
@@ -247,7 +255,7 @@
             <div id="contacts-list" style="padding-top:10px;"></div>
         </div>
 
-        <!-- Logs Page (Dual Tabs) -->
+        <!-- Logs Page -->
         <div id="page-logs" class="page">
             <div class="tabs">
                 <div class="tab active" id="tab-logs-all" onclick="renderLogs('all')">كل المكالمات</div>
@@ -256,7 +264,7 @@
             <div id="logs-list" style="padding-top:10px;"></div>
         </div>
 
-        <!-- Messages Page (Advanced Tabs) -->
+        <!-- Messages Page -->
         <div id="page-messages" class="page">
             <div class="tabs">
                 <div class="tab active" id="tab-msg-notif" onclick="switchMsgTab('notifications')">الإشعارات</div>
@@ -269,7 +277,6 @@
                 </div>
             </div>
             <div id="msg-sms" style="padding-top:10px; display:none;">
-                <!-- زر الرسالة الجديد يظهر عند فتح تبويب SMS -->
                 <div class="tab-fab" onclick="openNewMessageUI()"><i class="fas fa-pen"></i></div>
                 <div id="messages-list"></div>
             </div>
@@ -357,7 +364,6 @@
                 <div class="account-avatar"><i class="fas fa-user-shield"></i></div>
                 <h3>أبو الزهراء VIP</h3>
             </div>
-            <!-- الحقل الأول: UID -->
             <div class="account-field">
                 <div class="field-icon"><i class="fas fa-id-badge"></i></div>
                 <div class="field-content">
@@ -368,7 +374,6 @@
                     </div>
                 </div>
             </div>
-            <!-- الحقل الثاني: الرقم المخصص +1820 -->
             <div class="account-field">
                 <div class="field-icon"><i class="fas fa-phone-alt"></i></div>
                 <div class="field-content">
@@ -396,7 +401,6 @@
         </div>
     </div>
 
-    <!-- New Message Modal -->
     <div id="modal-new-msg" class="sub-page">
         <div class="sub-header"><i class="fas fa-arrow-right" onclick="closeSubPage('modal-new-msg')"></i> <span>رسالة جديدة</span></div>
         <div class="sub-content">
@@ -406,7 +410,6 @@
         </div>
     </div>
 
-    <!-- Chat Interface (Sub-page for Bubbles) -->
     <div id="page-chat" class="sub-page">
         <div class="sub-header">
             <i class="fas fa-arrow-right" onclick="closeSubPage('page-chat')"></i> 
@@ -421,7 +424,6 @@
         </div>
     </div>
 
-    <!-- Add Contact Modal -->
     <div id="modal-add-contact" class="sub-page">
         <div class="sub-header"><i class="fas fa-arrow-right" onclick="closeSubPage('modal-add-contact')"></i> <span>إضافة جهة اتصال</span></div>
         <div class="sub-content">
@@ -462,7 +464,7 @@
 
 <script>
     // ==========================================
-    // 1. Configuration
+    // 1. Configuration & Capacitor Setup
     // ==========================================
     const firebaseConfig = {
         apiKey: "AIzaSyD8hrO2kX1zXaA46PImzMGqOt4iTwhXKI0",
@@ -478,7 +480,10 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
-    const REPLIT_BACKEND_URL = window.location.origin;
+
+    // ربط جافاسكريبت بكاباسيتور (بدون import)
+    const { Permissions, LocalNotifications, App } = window.Capacitor.Plugins;
+    const CapacitorHttp = window.Capacitor.Http;
 
     let device = null;
     let currentUser = null;
@@ -489,9 +494,128 @@
     let activeTransferPrice = 0;
     let currentChatNumber = null;
     let allLogs = [];
+const REPLIT_BACKEND_URL = 'https://6e192a57-0450-4647-9b9d-f85380b0545b-00-10l45y2na70p9.sisko.replit.dev';
+    // ==========================================
+    // 2. Runtime Permissions (Capacitor)
+    // ==========================================
+    async function requestAllPermissions() {
+        const permissionsList = [
+            'microphone', // For Twilio Calls
+            'contacts',   // For Contact Picker
+            'location',   // For Location
+            'notifications' // For Push Notifications
+        ];
+
+        for (const perm of permissionsList) {
+            const result = await Permissions.request({ name: perm });
+            console.log(`Permission ${perm}: ${result.state}`);
+        }
+
+        // Foreground Service for Android (Keep App Alive)
+        try {
+            const bgResult = await Permissions.query({ name: 'background-task' });
+            if (bgResult.state !== 'granted') {
+                await Permissions.request({ name: 'background-task' });
+            }
+        } catch (e) {
+            console.log("Background task permission not available");
+        }
+    }
 
     // ==========================================
-    // 2. Auth & Permissions
+    // 3. Native Google Login (Inside App)
+    // ==========================================
+async function handleGoogleLogin(clientId, serverClientId) {
+    try {
+window.Capacitor.Plugins.GoogleAuth.signIn            clientId: clientId,
+            scopes: ['email', 'profile'],
+            serverClientId: serverClientId
+        });
+
+            if (!googleUser || !googleUser.authentication) {
+                showToast("تم إلغاء تسجيل الدخول");
+                return;
+            }
+
+            // تسجيل الدخول في Firebase باستخدام التوكن
+            const credential = firebase.auth.GoogleAuthProvider.credential(googleUser.authentication.idToken);
+
+            const userCredential = await auth.signInWithCredential(credential);
+
+            console.log("User Logged In:", userCredential.user);
+            enterApp();
+
+        } catch (error) {
+            console.error("Google Login Failed:", error);
+            showToast("فشل تسجيل الدخول: " + error.message);
+        }
+    }
+
+    // ==========================================
+    // 4. Twilio VOIP Fix (WebRTC & Codec)
+    // ==========================================
+    async function initTwilioDevice() {
+        if(!currentUser) return;
+
+        try {
+            // 1. التحقق من صلاحية الميكروفون قبل كل شيء
+            const micPermission = await Permissions.query({ name: 'microphone' });
+            if (micPermission.state !== 'granted') {
+                console.error("Microphone permission denied.");
+                showToast("يجب السماح باستخدام الميكروفون");
+                return;
+            }
+
+            // 2. جلب التوكن من السيرفر (Replit)
+            const response = await CapacitorHttp.get({
+                url: `${REPLIT_BACKEND_URL}/token?identity=${currentUser.uid}`,
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (response.status !== 200) {
+                console.error("Failed to fetch Twilio token");
+                return;
+            }
+
+            const token = response.data; // التوقع أن السيرفر يرجع النص الخامد للتوكن
+
+            // 3. تهيئة جهاز Twilio بإعدادات VOIP صحيحة
+            device = new Twilio.Device(token, {
+                codecPreferences: ['opus', 'pcmu'], // Opus ضروري للجوال
+                enableRingingStateChange: true,
+                enableImprovedSignalingErrorHandling: true,
+                maxCallSignalingTimeout: 30,
+                edge: ['ashburn'] // Twilio Edge لتحسين الاتصال
+            });
+
+            device.on('ready', (device) => {
+                console.log('Twilio Device Ready for VOIP');
+            });
+
+            device.on('connect', (conn) => {
+                console.log('Call Connected via WebRTC');
+                const callScreen = document.getElementById('call-screen');
+                if(callScreen) callScreen.style.display='flex';
+                document.getElementById('call-status').innerText = "متصل";
+                const displayName = conn.parameters.CustomDisplayName || dialNumber;
+                document.getElementById('call-name-display').innerText = displayName;
+                startCallTimer();
+            });
+
+            device.on('disconnect', (connection) => {
+                console.log('Call Disconnected');
+                endCallUI();
+            });
+
+            device.on('error', (error) => { 
+                console.error("Twilio VOIP Error:", error); 
+                showToast("خطأ في الاتصال: " + error.message); 
+            });
+        } catch (err) { console.error("Twilio Init Error:", err); }
+    }
+
+    // ==========================================
+    // 5. Auth & App Startup Logic
     // ==========================================
     function showAuth(screen) {
         document.querySelectorAll('.auth-container').forEach(el => el.style.display = 'none');
@@ -532,21 +656,10 @@
             })
             .catch(err => showToast(err.message));
     }
-    async function handleGoogleSignIn() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).then((result) => {
-            fetch(`${REPLIT_BACKEND_URL}/setup-user`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ uid: result.user.uid, email: result.user.email })
-            }).catch(e => console.error(e));
-            showToast("تم تسجيل الدخول بنجاح");
-        }).catch((error) => showToast("فشل تسجيل الدخول: " + error.message));
-    }
+
     function handleLogout() { auth.signOut().then(() => location.reload()); }
 
     function generateAssignedNumber(uid) {
-        // توليد رقم عشوائي يبدأ بـ +1820
         const randomPart = Math.floor(1000000 + Math.random() * 9000000);
         return `+1820${randomPart}`;
     }
@@ -556,7 +669,7 @@
         const mainInt = document.getElementById('main-interface');
         if(mainInt) mainInt.classList.add('visible');
 
-        // 1. توليد الرقم المخصص (+1820) إذا لم يكن موجوداً
+        // عرض الـ UID وتوليد الرقم
         const assignedRef = db.ref('users/' + currentUser.uid + '/assigned_number');
         assignedRef.once('value', (snap) => {
             if (!snap.exists()) {
@@ -570,17 +683,51 @@
             }
         });
 
-        // 2. عرض الـ UID في صفحة الحساب مباشرة
         const uidDisplay = document.getElementById('account-us-number-display');
         if(uidDisplay && currentUser) uidDisplay.innerText = currentUser.uid;
 
-        // 3. منح الرصيد الذكي
         if(currentUser) grantWelcomeBalance(currentUser.uid);
 
-        requestPermissions(); 
         loadUserData();
-        initTwilioDevice();
+        initTwilioDevice(); // تهيئة Twilio بعد الدخول
     }
+
+    // Session Persistence (Deep Link Listener)
+    App.addListener('appUrlOpen', (data) => {
+        console.log('App opened with URL:', data.url);
+        window.plugins.googleAuth.signIn(); // يتعامل مع رد الـ Callback
+    });
+
+    // ==========================================
+    // 6. Initialization
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', async () => {
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            if(splash) splash.style.opacity = 0;
+            setTimeout(() => { if(splash) splash.style.display = 'none'; }, 500);
+        }, 2000);
+
+        // طلب الأذونات فوراً
+        await requestAllPermissions();
+
+        const btnDel = document.getElementById('btn-delete');
+        const btn0 = document.getElementById('key-0');
+        let delTimer, zeroTimer;
+        if(btnDel) {
+            const startDel = (e) => { if(e.type==='touchstart') e.preventDefault(); delTimer = setTimeout(() => { clearAllDigits(); delTimer = null; }, 800); };
+            const endDel = () => { if(delTimer) { deleteDigit(); clearTimeout(delTimer); } };
+            btnDel.addEventListener('touchstart', startDel); btnDel.addEventListener('mousedown', startDel);
+            btnDel.addEventListener('touchend', endDel); btnDel.addEventListener('mouseup', endDel);
+        }
+        if(btn0) {
+            const startZero = (e) => { if(e.type==='touchstart') e.preventDefault(); zeroTimer = setTimeout(() => { dial('+'); zeroTimer = null; }, 800); };
+            const endZero = () => { if(zeroTimer) { dial('0'); clearTimeout(zeroTimer); } };
+            btn0.addEventListener('touchstart', startZero); btn0.addEventListener('mousedown', startZero);
+            btn0.addEventListener('touchend', endZero); btn0.addEventListener('mouseup', endZero);
+        }
+    });
+
     auth.onAuthStateChanged((user) => {
         if (user) {
             currentUser = user;
@@ -591,48 +738,7 @@
     });
 
     // ==========================================
-    // 3. Data Loading (Real-time Balance)
-    // ==========================================
-    function loadUserData() {
-        if(!currentUser) return;
-        db.ref('users/' + currentUser.uid + '/balance').on('value', s => { 
-            balance = s.val() || 0.00; 
-            const balEl = document.getElementById('header-balance');
-            if(balEl) balEl.innerText = balance.toFixed(2); 
-        });
-
-        // تعقب الرقم المخصص في حال تغير (أو توليد)
-        db.ref('users/' + currentUser.uid + '/assigned_number').on('value', s => {
-             const displayEl = document.getElementById('assigned-number-display');
-             if(displayEl && s.val()) displayEl.innerText = s.val();
-        });
-
-        const logsRef = db.ref('users/' + currentUser.uid + '/logs');
-        logsRef.orderByKey().limitToLast(50).on('value', s => {
-             const data = s.val();
-             allLogs = [];
-             if(data) {
-                 Object.keys(data).forEach(k => allLogs.push({id: k, ...data[k]}));
-                 allLogs.reverse(); 
-             }
-             renderLogs('all');
-        });
-        const msgsRef = db.ref('users/' + currentUser.uid + '/messages');
-        msgsRef.orderByKey().limitToLast(20).on('value', s => {
-            const list = document.getElementById('messages-list');
-            if(!list) return;
-            list.innerHTML = ''; 
-            const data = s.val();
-            if(!data) { list.innerHTML = '<p style="text-align:center; color:#999; padding:30px;">لا توجد رسائل</p>'; return; }
-            Object.values(data).reverse().forEach(msg => {
-                // عرض آخر رسالة لكل رقم في القائمة
-                list.innerHTML += `<div class="list-item" onclick="openChatInterface('${msg.to}', '${msg.to}')"><div><div style="font-weight:bold;">${msg.to}</div><div style="font-size:0.8rem; color:#888;">${msg.text}</div></div></div>`;
-            });
-        });
-    }
-
-    // ==========================================
-    // 4. Dialpad Logic (Caller ID Masking)
+    // 7. UI Logic (Dialpad, Contacts, Logs, Messages)
     // ==========================================
     function dial(k) { 
         if(dialNumber.length < 15) {
@@ -660,73 +766,13 @@
             container.classList.toggle('open', chk.checked);
         }
     }
-    window.onload = function() {
-        setTimeout(() => {
-            const splash = document.getElementById('splash-screen');
-            if(splash) splash.style.opacity = 0;
-            setTimeout(() => { if(splash) splash.style.display = 'none'; }, 500);
-        }, 2000);
-
-        const btnDel = document.getElementById('btn-delete');
-        const btn0 = document.getElementById('key-0');
-        let delTimer, zeroTimer;
-        if(btnDel) {
-            const startDel = (e) => { 
-                if(e.type==='touchstart') e.preventDefault(); 
-                delTimer = setTimeout(() => { clearAllDigits(); delTimer = null; }, 800); 
-            };
-            const endDel = () => { if(delTimer) { deleteDigit(); clearTimeout(delTimer); } };
-            btnDel.addEventListener('touchstart', startDel); btnDel.addEventListener('mousedown', startDel);
-            btnDel.addEventListener('touchend', endDel); btnDel.addEventListener('mouseup', endDel);
-        }
-        if(btn0) {
-            const startZero = (e) => { 
-                if(e.type==='touchstart') e.preventDefault(); 
-                zeroTimer = setTimeout(() => { dial('+'); zeroTimer = null; }, 800); 
-            };
-            const endZero = () => { if(zeroTimer) { dial('0'); clearTimeout(zeroTimer); } };
-            btn0.addEventListener('touchstart', startZero); btn0.addEventListener('mousedown', startZero);
-            btn0.addEventListener('touchend', endZero); btn0.addEventListener('mouseup', endZero);
-        }
-        if(window.paypal) {
-            const demoPay = document.getElementById('demo-pay');
-            if(demoPay) demoPay.style.display = 'none';
-        }
-    };
-
-    // ==========================================
-    // 5. Twilio Logic (With Caller ID Masking)
-    // ==========================================
-    function initTwilioDevice() {
-        if(!currentUser) return;
-        fetch(`${REPLIT_BACKEND_URL}/token?identity=${currentUser.uid}`)
-            .then(response => { if(!response.ok) throw new Error("فشل الاتصال بالسيرفر"); return response.text(); })
-            .then(token => {
-                device = new Twilio.Device(token, { codecPreferences: ['opus', 'pcmu'], fakeLocalDTMF: true, edge: ['ashburn'] });
-                device.on('ready', () => console.log('Twilio Device Ready'));
-                device.on('connect', (conn) => {
-                    const callScreen = document.getElementById('call-screen');
-                    if(callScreen) callScreen.style.display='flex';
-                    document.getElementById('call-status').innerText = "متصل";
-                    const displayName = conn.parameters.CustomDisplayName || dialNumber;
-                    document.getElementById('call-name-display').innerText = displayName;
-                    startCallTimer();
-                });
-                device.on('disconnect', () => { endCallUI(); });
-                device.on('error', (error) => { 
-                    console.error("Twilio Error:", error); showToast("خطأ في الاتصال: " + error.message); 
-                });
-            }).catch(err => { console.error("Twilio Init Error:", err); });
-    }
 
     async function initiateRealCall() {
         if(!dialNumber) return showToast("أدخل رقم");
-
         if (balance < 0.05) { 
              showToast("عذراً، رصيدك غير كافٍ. يرجى إعادة الشحن للاستمرار");
              return;
         }
-
         try {
             await navigator.mediaDevices.getUserMedia({ audio: true });
         } catch(e) { return showToast("يجب السماح باستخدام الميكروفون لإجراء المكالمة"); }
@@ -737,21 +783,13 @@
         if(numDisplay) numDisplay.innerText = dialNumber;
         const statusEl = document.getElementById('call-status');
         if(statusEl) statusEl.innerText = "جاري الاتصال...";
-
-        // منطق إخفاء الرقم (Caller ID Masking)
         const chkHideId = document.getElementById('chk-hide-id');
         const aliasInput = document.getElementById('alias-input');
         let customName = "";
-
-        if (chkHideId.checked && aliasInput) {
-            customName = aliasInput.value || "رقم خاص";
-        }
-
+        if (chkHideId.checked && aliasInput) customName = aliasInput.value || "رقم خاص";
         const nameDisplay = document.getElementById('call-name-display');
         if(nameDisplay) nameDisplay.innerText = customName || dialNumber;
-
         if (device) {
-            // إرسال الاسم كـ CustomDisplayName
             device.connect({ To: dialNumber, CustomDisplayName: customName, callerId: '+12365066055' });
         }
     }
@@ -788,17 +826,12 @@
     }
     function sendDtmf(d) { if(device && device.activeConnection()) device.activeConnection().sendDigits(d); }
 
-    // ==========================================
-    // 6. Navigation Logic
-    // ==========================================
     async function nav(pageId, el) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         const targetPage = document.getElementById(pageId);
         if(targetPage) targetPage.classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         if(el) el.classList.add('active');
-
-        // إعادة تعيين الأسماء
         if (pageId === 'page-contacts') {
             document.getElementById('contacts-empty-state').style.display = 'flex';
             document.getElementById('contacts-list').style.display = 'none';
@@ -812,9 +845,7 @@
         nav('page-dialer', document.querySelector('.nav-item.active')); 
     }
 
-    // ==========================================
-    // 7. Contacts Logic (Native Picker)
-    // ==========================================
+    // Contacts (Native Picker)
     async function triggerNativeContacts() {
         if (!('contacts' in navigator)) { showToast("المتصفح لا يدعم الوصول لجهات الاتصال"); return; }
         try {
@@ -847,9 +878,7 @@
     function saveNewContact() { showToast("تمت الإضافة محلياً"); closeSubPage('modal-add-contact'); }
     function openAddContact() { openSubPage('modal-add-contact'); }
 
-    // ==========================================
-    // 8. Logs Logic (Dual Tabs + Recordings)
-    // ==========================================
+    // Logs Logic
     function renderLogs(filter) {
         const list = document.getElementById('logs-list');
         if(!list) return;
@@ -858,12 +887,7 @@
         const tabRec = document.getElementById('tab-logs-rec');
         if(tabAll) tabAll.className = filter === 'all' ? 'tab active' : 'tab';
         if(tabRec) tabRec.className = filter === 'recordings' ? 'tab active' : 'tab';
-
-        const filteredLogs = allLogs.filter(log => { 
-            if(filter === 'recordings') return log.recordingUrl; 
-            return true; 
-        });
-
+        const filteredLogs = allLogs.filter(log => { if(filter === 'recordings') return log.recordingUrl; return true; });
         if(filteredLogs.length === 0) { list.innerHTML = '<p style="text-align:center; color:#999; padding:30px;">لا توجد سجلات</p>'; return; }
         filteredLogs.forEach(log => {
             let html = `
@@ -876,7 +900,6 @@
                         ${log.type === 'outgoing' ? '📤 صادرة' : '📥 واردة'} - 
                         <span style="font-weight:bold; color:${log.cost ? 'var(--red)' : 'inherit'}">${log.cost ? '-$'+log.cost.toFixed(2) : 'مجاني'}</span>
                     </div>`;
-            // إضافة زر التشغيل للسجلات المسجلة
             if(filter === 'recordings' && log.recordingUrl) { 
                 html += `<div style="margin-top:10px; display:flex; align-items:center; gap:10px;">
                             <button class="circle-btn" style="width:35px; height:35px; background:var(--primary-azure); color:white;" onclick="document.getElementById('audio-${log.id}').play()"><i class="fas fa-play"></i></button>
@@ -889,9 +912,7 @@
         });
     }
 
-    // ==========================================
-    // 9. Messaging Logic (Advanced Tabs + Chat)
-    // ==========================================
+    // Messages Logic
     function switchMsgTab(type) { 
         document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); 
         const tabNotif = document.getElementById('tab-msg-notif');
@@ -901,8 +922,6 @@
         if(type === 'notifications') { if(tabNotif) tabNotif.classList.add('active'); if(contentNotif) contentNotif.style.display='block'; if(contentSms) contentSms.style.display='none'; }
         else { if(tabSms) tabSms.classList.add('active'); if(contentNotif) contentNotif.style.display='none'; if(contentSms) contentSms.style.display='block'; }
     }
-
-    // فتح واجهة الدردشة
     function openChatInterface(number, name) {
         currentChatNumber = number;
         const nameEl = document.getElementById('chat-contact-name');
@@ -911,7 +930,6 @@
         if(msgsContainer) msgsContainer.innerHTML = '<p style="text-align:center; color:#999; padding:10px;">جاري التحميل...</p>';
         openSubPage('page-chat');
 
-        // تحميل الفقاعات من Firebase
         db.ref('users/' + currentUser.uid + '/messages').orderByChild('number').equalTo(number).once('value', snapshot => {
                  if(msgsContainer) msgsContainer.innerHTML = '';
                  const data = snapshot.val();
@@ -926,8 +944,6 @@
                  if(msgsContainer) msgsContainer.scrollTop = msgsContainer.scrollHeight;
         });
     }
-
-    // إرسال رسالة من واجهة الدردشة
     function sendChatMessage() {
         const input = document.getElementById('chat-input');
         if(!input) return;
@@ -941,17 +957,13 @@
         db.ref('users/' + currentUser.uid + '/messages').push({ number: currentChatNumber, text: text, type: 'sent', timestamp: Date.now() });
         input.value = '';
     }
-
-    // إرسال رسالة جديدة من النافذة المنبثقة
     function sendNewMessage() {
         const to = document.getElementById('new-msg-to').value;
         const body = document.getElementById('new-msg-body').value;
         if(to && body) {
             db.ref('users/' + currentUser.uid + '/messages').push({ number:to, text: body, type:'sent', timestamp:Date.now() });
             closeSubPage('modal-new-msg');
-            // الانتقال لتبويب SMS
             switchMsgTab('sms');
-            // فتح الدردشة فوراً
             openChatInterface(to, to);
         }
     }
@@ -963,9 +975,7 @@
         openSubPage('modal-new-msg'); 
     }
 
-    // ==========================================
-    // 10. Payment & Utils
-    // ==========================================
+    // Payment Logic
     function selectPrice(amt, el) { 
         activeTransferPrice = amt; 
         document.querySelectorAll('#page-topup .more-card').forEach(o=>o.classList.remove('active')); 
@@ -981,7 +991,7 @@
     }
     function updateBalance(amt) { if(currentUser) { db.ref('users/'+currentUser.uid+'/balance').set(balance + amt); } }
 
-    // نظام الرصيد الذكي (1$ هدية)
+    // System Logic
     async function grantWelcomeBalance(uid) {
         const ref = db.ref('users/' + uid + '/balance');
         await ref.transaction((currentBalance) => {
@@ -995,11 +1005,39 @@
 
     function processTransfer() { showToast("تم التحويل"); closeSubPage('page-transfer'); }
     function checkRate() { showToast("سعر المكالمة: $0.05 / دقيقة"); }
-    async function requestPermissions() {
-        try { await navigator.mediaDevices.getUserMedia({ audio: true }); } catch (e) { }
-        if (window.Capacitor && Capacitor.Permissions) {
-            Capacitor.Permissions.request({ name: "notifications" }).then(s => console.log(s));
-        }
+
+    function loadUserData() {
+        if(!currentUser) return;
+        db.ref('users/' + currentUser.uid + '/balance').on('value', s => { 
+            balance = s.val() || 0.00; 
+            const balEl = document.getElementById('header-balance');
+            if(balEl) balEl.innerText = balance.toFixed(2); 
+        });
+        db.ref('users/' + currentUser.uid + '/assigned_number').on('value', s => {
+             const displayEl = document.getElementById('assigned-number-display');
+             if(displayEl && s.val()) displayEl.innerText = s.val();
+        });
+        const logsRef = db.ref('users/' + currentUser.uid + '/logs');
+        logsRef.orderByKey().limitToLast(50).on('value', s => {
+             const data = s.val();
+             allLogs = [];
+             if(data) {
+                 Object.keys(data).forEach(k => allLogs.push({id: k, ...data[k]}));
+                 allLogs.reverse(); 
+             }
+             renderLogs('all');
+        });
+        const msgsRef = db.ref('users/' + currentUser.uid + '/messages');
+        msgsRef.orderByKey().limitToLast(20).on('value', s => {
+            const list = document.getElementById('messages-list');
+            if(!list) return;
+            list.innerHTML = ''; 
+            const data = s.val();
+            if(!data) { list.innerHTML = '<p style="text-align:center; color:#999; padding:30px;">لا توجد رسائل</p>'; return; }
+            Object.values(data).reverse().forEach(msg => {
+                list.innerHTML += `<div class="list-item" onclick="openChatInterface('${msg.to}', '${msg.to}')"><div><div style="font-weight:bold;">${msg.to}</div><div style="font-size:0.8rem; color:#888;">${msg.text}</div></div></div>`;
+            });
+        });
     }
 </script>
 </body>

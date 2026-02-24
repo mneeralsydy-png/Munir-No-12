@@ -1,44 +1,114 @@
-name: Build Android APK
+name: Abu Zahra Google Native 4.3.1
+
 on:
   push:
-    branches: [ main ]
+    branches: [ "main", "Push" ]
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      - name: set up JDK 17
+      - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          distribution: 'zulu'
+          java-version: '21'
 
-      - name: Organize Files (إعادة تنظيم الملفات تلقائياً)
+      - name: Nuclear Cleanup & Plugin Install
         run: |
-          mkdir -p android/app/src/main/
-          # نقل المانيفست لمكانه الصحيح إذا كان في الخارج
-          if [ -f "AndroidManifest.xml" ]; then
-            mv AndroidManifest.xml android/app/src/main/
-          fi
-          # التأكد من وجود ملفات السيرفر
-          cp server.cjs android/app/src/main/assets/ 2>/dev/null || true
+          # تنظيف كامل وتثبيت المكتبات اللازمة لتسجيل الدخول الداخلي
+          npm install -g @capacitor/cli
+          npm install @capacitor/core @capacitor/android --force
+          # هذه المكتبة هي المسؤولة عن نافذة جوجل التي تظهر فوق التطبيق
+          npm install @codetrix-studio/capacitor-google-auth @capacitor-community/contacts --force
+          rm -rf android
+          echo '{"appId": "com.munir.abuzahra", "appName": "Abu Zahra", "webDir": "public"}' > capacitor.config.json
+          npx cap add android
 
-      - name: Install Capacitor Core
+      - name: Fix Style Resources
         run: |
-          npm install @capacitor/core @capacitor/cli @capacitor/android --force
+          # منع الخطأ الذي ظهر في الصورة 16 عبر بناء الثيم يدوياً
+          VALUES_DIR="android/app/src/main/res/values"
+          mkdir -p $VALUES_DIR
+          cat <<EOF > $VALUES_DIR/styles.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+                  <item name="colorPrimary">#3F51B5</item>
+                  <item name="colorPrimaryDark">#303F9F</item>
+                  <item name="colorAccent">#FF4081</item>
+              </style>
+              <style name="AppTheme.NoActionBarLauncher" parent="Theme.AppCompat.Light.NoActionBar">
+                  <item name="android:windowBackground">@null</item>
+              </style>
+          </resources>
+          EOF
 
-      - name: Create Android Structure
-        run: npx cap add android || true
+      - name: Configure Manifest for Native Login
+        run: |
+          # المانيفست الآن مجهز للأذونات وربط جوجل داخلياً
+          cat <<EOF > android/app/src/main/AndroidManifest.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET" />
+              <uses-permission android:name="android.permission.READ_CONTACTS" />
+              <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+              <uses-permission android:name="android.permission.RECORD_AUDIO" />
+              <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+              <uses-permission android:name="android.permission.CALL_PHONE" />
+              
+              <application
+                  android:allowBackup="true"
+                  android:icon="@mipmap/ic_launcher"
+                  android:label="@string/app_name"
+                  android:roundIcon="@mipmap/ic_launcher_round"
+                  android:supportsRtl="true"
+                  android:theme="@style/AppTheme">
+                  <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+                  <activity
+                      android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
+                      android:name="com.munir.abuzahra.MainActivity"
+                      android:label="@string/title_activity_main"
+                      android:theme="@style/AppTheme.NoActionBarLauncher"
+                      android:launchMode="singleTask"
+                      android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
 
-      - name: Build with Gradle
+      - name: Force Dependency Resolution
+        run: |
+          # القضاء النهائي على Duplicate Class (الصورة 21 و 22)
+          # سنقوم بحظر استدعاء نسخ Kotlin القديمة تماماً
+          echo "android.useAndroidX=true" > android/gradle.properties
+          echo "android.enableJetifier=true" >> android/gradle.properties
+          echo "kotlin.stdlib.default.dependency=false" >> android/gradle.properties
+          
+          BUILD_GRADLE="android/build.gradle"
+          printf "\nallprojects {\n    configurations.all {\n        resolutionStrategy {\n            force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.10'\n            force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10'\n            exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jre7'\n            exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jre8'\n        }\n    }\n}\n" >> $BUILD_GRADLE
+          
+          # تحديث نسخة التطبيق
+          sed -i 's/versionCode [0-9]*/versionCode 40301/' android/app/build.gradle
+          sed -i 's/versionName "[^"]*"/versionName "4.3.1"/' android/app/build.gradle
+          npx cap sync android
+
+      - name: Final Build
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew clean assembleDebug -x test --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: "**/*.apk"
+          name: Abu-Zahra-v4.3.1-Success
+          path: android/app/build/outputs/apk/debug/app-debug.apk

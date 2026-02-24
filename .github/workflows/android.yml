@@ -7,20 +7,38 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Install Dependencies
-        run: npm install --force
+
+      - name: Organize Files (إعادة تنظيم الملفات تلقائياً)
+        run: |
+          mkdir -p android/app/src/main/
+          # نقل المانيفست لمكانه الصحيح إذا كان في الخارج
+          if [ -f "AndroidManifest.xml" ]; then
+            mv AndroidManifest.xml android/app/src/main/
+          fi
+          # التأكد من وجود ملفات السيرفر
+          cp server.cjs android/app/src/main/assets/ 2>/dev/null || true
+
+      - name: Install Capacitor Core
+        run: |
+          npm install @capacitor/core @capacitor/cli @capacitor/android --force
+
+      - name: Create Android Structure
+        run: npx cap add android || true
+
       - name: Build with Gradle
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: "**/*.apk"

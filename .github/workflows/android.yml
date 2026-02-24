@@ -13,11 +13,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Install Dependencies
-        run: npm install
-      - name: Build Web Assets
-        run: npm run build --if-present
-      - name: Sync Capacitor
-        run: npx cap sync android
+        run: npm install --force
       - name: Build with Gradle
         run: |
           cd android
